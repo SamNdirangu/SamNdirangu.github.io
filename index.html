@@ -10,16 +10,16 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 /* Layout: a single column read like a rack elevation. Each section is a labelled unit (U) with a mono rack label in the left rail.
-   Look: committed single dark theme, forest and emerald greens with phosphor-green highlights, Matrix rain behind the hero. */
+   Look: committed single dark theme, forest greens with gold highlights, Matrix rain behind the hero. */
 :root {
-  --paper: #04110b;       /* near-black forest */
-  --panel: #0a1c14;
-  --ink: #d5eadf;
-  --muted: #7fa592;
-  --rule: #173a2a;
-  --accent: #34c47c;      /* emerald */
-  --led: #6dffa8;         /* phosphor green, used sparingly */
-  --led-soft: #0f3020;
+  --paper: #08130d;       /* near-black forest */
+  --panel: #0f2016;
+  --ink: #e8eadb;
+  --muted: #9aa88f;
+  --rule: #233a2a;
+  --accent: #3d9b5f;      /* forest green */
+  --led: #e3b341;         /* gold, used sparingly */
+  --led-soft: #2b2410;
   --display: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -30,6 +30,18 @@
   --step-3: clamp(2rem, 5.4vw, 3.3rem);
   color-scheme: dark;
 }
+
+/* Light mode: same forest and gold, on pale sage paper. Toggled from the top bar. */
+:root[data-mode="light"] {
+  --paper: #f1f4ec; --panel: #ffffff; --ink: #13261a; --muted: #536656;
+  --rule: #d2dccd; --accent: #2e7546; --led: #9a6d0a; --led-soft: #f3e8c9;
+  color-scheme: light;
+}
+:root[data-mode="light"] .rain { opacity: .14; }
+.mode { font: 500 var(--step--1)/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); background: transparent; border: 1px solid var(--rule); padding: 7px 10px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.mode:hover { color: var(--led); border-color: var(--led); }
+.bar .right { display: flex; align-items: center; gap: 18px; }
+
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -178,9 +190,12 @@ footer { padding-top: 32px; font: 400 var(--step--1)/1.5 var(--mono); color: var
 <header class="bar">
   <div class="wrap">
     <a class="mark" href="#top">samndirangu</a>
-    <nav aria-label="Sections">
-      <a href="#work">Work</a><a href="#story">Story</a><a href="#cv">CV</a><a href="#contact">Contact</a>
-    </nav>
+    <div class="right">
+      <nav aria-label="Sections">
+        <a href="#work">Work</a><a href="#story">Story</a><a href="#cv">CV</a><a href="#contact">Contact</a>
+      </nav>
+      <button class="mode" id="mode" type="button" aria-pressed="false">Light mode</button>
+    </div>
   </div>
 </header>
 
@@ -397,7 +412,9 @@ document.querySelectorAll('.copy').forEach(function (b) {
   var x = c.getContext('2d'), cols, drops, size = 16;
   var glyphs = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉ0123456789VMQEMUKVM<>/{}';
   var css = getComputedStyle(document.documentElement);
-  var bg = css.getPropertyValue('--paper').trim(), fg = css.getPropertyValue('--accent').trim(), hi = css.getPropertyValue('--led').trim();
+  var bg, fg, hi;
+  function colours() { css = getComputedStyle(document.documentElement); bg = css.getPropertyValue('--paper').trim(); fg = css.getPropertyValue('--accent').trim(); hi = css.getPropertyValue('--led').trim(); }
+  colours(); window.addEventListener('modechange', function () { colours(); fit(); });
   function fit() {
     var r = c.getBoundingClientRect(), d = window.devicePixelRatio || 1;
     c.width = r.width * d; c.height = r.height * d; x.setTransform(d, 0, 0, d, 0, 0);
@@ -420,6 +437,23 @@ document.querySelectorAll('.copy').forEach(function (b) {
   if (still) { for (var k = 0; k < 60; k++) step(); return; }
   for (var j = 0; j < 40; j++) step();
   setInterval(step, 70);
+})();
+
+
+(function () {
+  var root = document.documentElement, b = document.getElementById('mode');
+  function set(m) {
+    if (m === 'light') root.setAttribute('data-mode', 'light'); else root.removeAttribute('data-mode');
+    b.textContent = m === 'light' ? 'Dark mode' : 'Light mode';
+    b.setAttribute('aria-pressed', m === 'light' ? 'true' : 'false');
+    window.dispatchEvent(new Event('modechange'));
+  }
+  b.addEventListener('click', function () {
+    var m = root.getAttribute('data-mode') === 'light' ? 'dark' : 'light';
+    try { localStorage.setItem('mode', m); } catch (e) {}
+    set(m);
+  });
+  try { if (localStorage.getItem('mode') === 'light') set('light'); } catch (e) {}
 })();
 </script>
 
